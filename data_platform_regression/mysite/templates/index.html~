@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<script type="text/javascript" src="/static/dist/js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="/static/jquery-ui/jquery-ui.js"></script>
+<link href="/static/dist/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+<script type="text/javascript" src="/static/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="span12">
+			<div class="tabbable container-fluid" id="tabs-40028">
+				<ul class="nav nav-tabs">
+					<li class="active">
+						<a href="#panel-670031" data-toggle="tab">报表数据回归</a>
+					</li>
+					<li>
+						<a href="#panel-628221" data-toggle="tab">报表图片回归</a>
+					</li>
+					<li>
+						<a href="#panel-638222" data-toggle="tab">Fakecube接口回归</a>
+					</li>
+					<li>
+						<a href="#panel-638223" data-toggle="tab">接口监控</a>
+					</li>
+					<li>
+						<a href="#panel-638224" data-toggle="tab">payAutoTest</a>
+					</li>
+
+                    <li>
+                        <a href="#panel-638225" data-toggle="tab">payAutoTestNew</a>
+                    </li>
+
+				</ul>
+				<div class="tab-content">
+					<div class="tab-pane active" id="panel-670031">
+						<object class="table table-striped" data="/queryGraph" width="100%" height="1000"></object>
+					</div>
+					<div class="tab-pane" id="panel-628221">
+						<object type="text/x-scriptlet" data="/queryReport" width="100%" height="1000"></object>
+					</div>
+					<div class="tab-pane" id="panel-638222">
+						<object class="table table-striped" data="/queryFakecube" width="100%" height="1000"></object>
+					</div>
+					<div class="tab-pane" id="panel-638223">
+						<object class="table table-striped" data="http://10.6.3.117:9000" width="100%" height="1000"></object>
+					</div>
+					<div class="tab-pane" id="panel-638224">
+						<object class="table table-striped" data="/payautotest" width="100%" height="1000"></object>
+					</div>
+
+                    <div class="tab-pane" id="panel-638225">
+                        <object class="table table-striped" data="/payautotestnew" width="100%" height="1000"></object>
+                    </div>
+
+				</div>
+			</div>
+			
+		</div>
+	</div>
+</div>
+
+
+<form id="runjob" action="/runJob" method="post">
+{% csrf_token %}
+<input type="hidden" id="returnckIds" name="runJobIds" />
+</form>
+
+</body>
+</html>

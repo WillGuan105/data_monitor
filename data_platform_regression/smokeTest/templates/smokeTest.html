@@ -1,0 +1,228 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="/static/dist/js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="/static/jquery-ui/jquery-ui.js"></script>
+<link href="/static/dist/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+<script type="text/javascript" src="/static/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/my-js/my-common.js"></script>
+</head>
+<body onload="statistics();loadAction()">
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="span12">
+			
+			<form class="form-horizontal">
+				<div class="control-group" style="float:right">
+					<form class="form-search">
+						<input class="input-medium search-query" type="text" /> <button type="submit" class="btn">查找</button>
+					</form>
+				</div>
+				<div class="control-group">
+					 <label class="control-label" for="onlinehost">线上Host</label>
+					<div class="controls">
+						<input id="onlinehost" placeholder="必填" type="text" value=""/>
+					</div>
+					<div class="btn-group" style="float:right">	
+						<select class="btn btn-info selectpicker" id="runhis">
+							{% for m in run_history %}
+							<option>
+								{{m.his_id}}
+							</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+				
+				<div class="control-group">
+					 <label class="control-label" for="testhost">测试Host</label>
+					<div class="controls">
+						<input id="testhost" placeholder="必填" type="text" value=""/>
+					</div>
+				</div>
+				<div style="float:right" class="statistics">
+					成功&nbsp;
+					<span id="suc-count"> 0</span>
+					&nbsp;个&nbsp;|&nbsp;失败&nbsp;
+					<span id="fail-count"> 0</span>
+					&nbsp;个
+				</div>
+				<div class="btn-group">	
+					<input class="btn btn-primary" id="execute" type="button" value="运行" />
+				</div>
+				<div class="btn-group">	
+					<p class="label" contenteditable="true" id="showstatus"></p>
+				</div>
+			</form>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>
+							编号
+						</th>
+						<th>
+							接口
+						</th>
+						<th>
+							参数
+						</th>
+						<th>
+							结果
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for m in data %}
+					   <tr class="{{m.i_status}}" id="tr_{{m.i_ID}}">								   
+					   <td name="box" id="{{ m.i_ID }}"> {{ m.i_ID }}</td>									   
+					   <td>{{ m.i_name }}</td>
+					   <td>{{m.i_params}}</td>
+					   <td id="status"><a name="m.status" id="status_{{ m.i_ID }}" href="/static/smokeTestDiff/{{m.i_ID}}.html">{{m.i_status}}</a></td>
+					   </tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			<div class="pagination">
+				<ul>
+					<li>	
+						<a onclick="prePage()">上一页</a>	
+					</li>
+					{%  for p in pages.page_range %}
+					<li>
+						<a href="?module={{module}}&page={{p}}&his_id={{his_id}}">{{p}}</a>
+					</li>
+					{% endfor %}
+					<li>
+						<a id ="nextpage" onclick="nextPage()">下一页</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+function loadAction()
+{
+	onlinehost=getCookie('onlinehost');
+	testhost=getCookie('testhost');
+	his_id=getCookie('his_id');
+	idx=getCookie('idx');
+	//alert(onlinehost);
+	document.getElementById('onlinehost').value=onlinehost;
+	document.getElementById('testhost').value=testhost;
+	window.document.getElementById('runhis').selectedIndex=idx;
+}
+
+function nextPage()
+{
+	var idx=getCookie('idx');
+    if (idx=="")
+        idx=window.document.getElementById('runhis').selectedIndex;
+	cur_show_runid=document.getElementById('runhis').options[idx].text;
+	{% if data.has_next %}
+		window.location.href='/smokeTest?module={{module}}&page={{data.next_page_number}}&his_id='+cur_show_runid;
+	{% else %}
+		window.location.href='#'
+	{% endif %}
+}
+
+function prePage()
+{
+	var idx=getCookie('idx');
+    if (idx=="")
+        idx=window.document.getElementById('runhis').selectedIndex;
+	cur_show_runid=document.getElementById('runhis').options[idx].text;
+	{% if data.has_previous %}
+		window.location.href='/smokeTest?module={{module}}&page={{data.previous_page_number}}&his_id='+cur_show_runid;
+	{% else %}
+		window.location.href='#'
+	{% endif %}
+}
+
+</script>
+
+<script>
+	var cur_show_runid;
+	$('#execute').click(function(){
+		$('#showstatus').text("running");
+		var onlinehost=document.getElementById('onlinehost').value;
+		var testhost=document.getElementById('testhost').value;
+		setCookie('onlinehost',onlinehost);
+		setCookie('testhost',testhost);
+		$.get('/runSmokeTest?module={{module}}',{"onlinehost":onlinehost,"testhost":testhost},function(ret){
+			location.reload('true');
+			st=ret.status
+			$('#showstatus').text(ret.status);
+		})
+	});
+
+	// $('#nextpage').click(function(){
+	// 	var idx=getCookie('idx');
+	// 	cur_show_runid=document.getElementById('runhis').options[idx].text;
+		
+		
+	// });
+
+	$('#runhis').ready(function(){
+		idx=window.document.getElementById('runhis').selectedIndex;
+		cur_show_runid=document.getElementById('runhis').options[idx].text;
+		var m = getAllDataId();
+		for(i=0; i<m.length; i++){
+			document.getElementById('status_'+m[i]).href='/static/smokeTestDiff/' + cur_show_runid + '_' + m[i] + '.html';
+		}
+		statistics();
+	});
+
+	$('#runhis').change(function(){
+		idx=window.document.getElementById('runhis').selectedIndex;
+		cur_show_runid=document.getElementById('runhis').options[idx].text;
+		document.getElementById('suc-count').innerHTML = 0;
+		document.getElementById('fail-count').innerHTML = 0;
+
+		var m = getAllDataId();
+		$.get('/querySmokeStatus?module={{module}}&his_id='+cur_show_runid,function(ret){
+			var rejson = JSON.parse(ret);
+			for(key in rejson){
+				chgClass=document.getElementById('tr_'+key)
+				if (chgClass)
+					chgClass.className=rejson[key];
+				chgStatus=document.getElementById('status_'+key)
+				if(chgStatus)
+					chgStatus.text=rejson[key];
+				if(rejson[key] == "success")
+					{document.getElementById('suc-count').innerHTML ++;}
+			    else if(rejson[key] =="error") 
+		        	{document.getElementById('fail-count').innerHTML ++;}
+			}
+		})
+		
+		for(i=0; i<m.length; i++){
+			document.getElementById('status_'+m[i]).href='/static/smokeTestDiff/' + cur_show_runid + '_' + m[i] + '.html';
+		}
+
+		setCookie('his_id',cur_show_runid,1);
+		setCookie('idx',idx,1);
+		//statistics();
+        
+	}); 
+
+	$('#replace').click(function(){
+		if(confirm("你确定要替换标准文件吗？")){
+			var ckIds=getAllChecked();
+			var ckIdsString = ckIds.join(",");
+			$.get('/replaceStand',{"repIds":ckIdsString},function(ret){
+				if(ret.status=="success")
+					alert("替换成功");
+				else
+					alert("替换失败");
+			})
+		} else{
+			return;
+		}
+	});   
+
+</script>
+
+</body>
+</html>

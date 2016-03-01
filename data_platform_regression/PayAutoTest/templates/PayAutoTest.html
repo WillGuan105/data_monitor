@@ -1,0 +1,134 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="/static/dist/js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="/static/jquery-ui/jquery-ui.js"></script>
+<link href="/static/dist/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+<script type="text/javascript" src="/static/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="span12">
+				<fieldset>
+					<legend>PayAutoTest</legend> 
+					<label>邮箱</label>
+					<input type="text" placeholder="用于接收结果邮件，必填" id="mailaddress">
+
+
+                    <label>选择执行环境</label>
+                    <label class="radio-inline">
+                        <input type="radio" checked="" name="runtype" value="newpay"/>新支付
+                    </label>
+
+                    <label class="radio-inline">
+                        <input type="radio" name="runtype"  value="smoke"/>冒烟测试
+                    </label>
+
+                    <label class="radio-inline">
+                        <input type="radio" name="runtype" value="oldpay"/>老支付
+                    </label>
+
+                    <label>环境配置信息</label>
+					<textarea rows="4" cols="50" style="width: 800px; height: 150px;" id="configuration">
+labn=yicheng.qalab
+username=whuyi
+password=1234hello
+userid=58264839
+paypwd=111111
+                    </textarea>
+
+					<label>数据库配置信息</label>
+					<textarea rows="4" cols="50" style="width: 800px; height: 150px;" id="dbconfig">
+ DB_DRIVER = com.mysql.jdbc.Driver
+ DB_USERNAME = mlstmpdb
+ DB_PASSWORD = mlstmpdb123456
+ #default/qalab1/qalab2/qalab3/rdlab
+ DB_DataBase=default
+					</textarea>	
+
+
+                    <label>工单号</label>
+                    <input type="text" placeholder="工单号，必填" id="jobid">
+
+                    </textarea>
+
+                    <span class="help-block">如果需要请换成自己的标准环境</span><!--  <label class="checkbox"><input type="checkbox" /> 勾选同意</label> -->
+					<input class="btn btn-primary" id="execute" type="button" value="运行" />
+					<p class="label" contenteditable="true" id="showstatus" href="#">ready</p>
+					<a class="label" id="showresult" href="/static/surefire-reports/index.html" target="_blank"></a>
+					<a  href="/payresult/" target="_blank">查看历史结果</a>
+		
+				</fieldset>
+			
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+function checkemail(){
+	var email = document.getElementById("mailaddress").value;
+	if (email != "") {
+		var reg = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/;
+	    isok= reg.test(email);
+	    if (!isok) {
+	        return false;
+	    }else{
+	    	return true;
+	    }
+	}
+	return false;
+}
+</script>
+
+<script>
+	$('#execute').click(function(){
+		var mail=document.getElementById('mailaddress').value;
+		var tm = checkemail();
+		if (!tm) {
+			alert('邮箱不合法');
+			return;
+		}
+
+
+        var runtype=document.getElementsByName("runtype");
+        var typevalue='';
+        for(i=0;i<runtype.length;i++){
+            if(runtype[i].checked){
+                typevalue=runtype[i].value;
+            }
+        }
+        if(typevalue==''){
+            alert('请选择执行环境');
+            return;
+        }
+
+
+		document.getElementById('showresult').style.visibility="hidden";
+		$('#showstatus').text("running");
+
+        document.getElementById('showresult').innerHTML="执行日志";
+        document.getElementById('showresult').href="/showresult/";
+        document.getElementById('showresult').style.visibility="visible";
+
+		var dbconf = document.getElementById('dbconfig').value;
+		var conf= document.getElementById('configuration').value;
+        var jobid=document.getElementById('jobid').value.replace(/\s*/ , "" );
+        if(jobid==""){
+            alert('工单号不能为空');
+            return;
+        }
+
+		$.get('/runpaytest',{"config":conf,"dbconf":dbconf,"mail":mail,"jobid":jobid,"runtype":typevalue},function(ret){
+			$('#showstatus').text(ret.status);
+			document.getElementById('showresult').innerHTML="查看结果";
+			document.getElementById('showresult').href=ret.r_link;
+			document.getElementById('showresult').style.visibility="visible";
+			
+		})
+		
+	});
+</script>
+
+</body>
+</html>

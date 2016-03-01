@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/static/dist/js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="/static/jquery-ui/jquery-ui.js"></script>
+    <link href="/static/dist/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+    <script type="text/javascript" src="/static/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span12">
+            <fieldset>
+
+                        <legend>清除实名认证</legend>
+                        <p>用户id:
+                        <input type="text" placeholder="用户id，必填" id="Ruserid">
+                        <input class="btn btn-primary" id="Rexecute" type="button" value="运行" />
+                        </p>
+
+                        <legend>清除钱包信息</legend>
+                        <p>用户id:
+                        <input type="text" placeholder="用户id，必填" id="Wuserid">
+                        <input class="btn btn-primary" id="Wexecute" type="button" value="运行" />
+                        </p>
+
+
+                <span class="help-block">执行结果</span><!--  <label class="checkbox"><input type="checkbox" /> 勾选同意</label> -->
+                <a class="label" id="showresult" href="#" target="_blank"></a>
+
+             </fieldset>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+<script>
+    $('#Wexecute').click(function(){
+        var userid=document.getElementById('Wuserid').value.replace(/\s*/ , "" );
+        if(userid==""){
+            alert('用户id不能为空');
+            return;
+        }
+        $.get('/clearwallet',{"userid":userid},function(ret){
+            document.getElementById('showresult').innerHTML=ret.status;
+            document.getElementById('showresult').style.visibility="visible";
+        })
+    });
+
+</script>
+
+
+<script>
+    $('#Rexecute').click(function(){
+        var userid=document.getElementById('Ruserid').value.replace(/\s*/ , "" );
+        if(userid==""){
+            alert('用户id不能为空');
+            return;
+        }
+        $.get('/clearwallet',{"userid":userid},function(ret){
+            document.getElementById('showresult').innerHTML=ret.status;
+            document.getElementById('showresult').style.visibility="visible";
+        })
+    });
+
+</script>
+
+
+
+</body>
+</html>

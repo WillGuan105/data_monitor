@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/static/dist/js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="/static/jquery-ui/jquery-ui.js"></script>
+    <link href="/static/dist/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+    <script type="text/javascript" src="/static/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span12">
+            <fieldset>
+
+                        <legend>清除实名认证</legend>
+                        <p>用户id:
+                        <input type="text" placeholder="用户id，必填" id="Ruserid">
+                        <input class="btn btn-primary" id="Rexecute" type="button" value="运行" />
+                        </p>
+
+                        <legend>清除钱包信息</legend>
+                        <p>用户id:
+                        <input type="text" placeholder="用户id，必填" id="Wuserid">
+                        <input class="btn btn-primary" id="Wexecute" type="button" value="运行" />
+                        </p>
+
+                        <legend>清除绑卡信息</legend>
+                         <p>用户id:
+                         <input type="text" placeholder="用户id，必填" id="Suserid">
+                         </p>
+                            <p>持卡人:
+                         <input type="text" placeholder="持卡人，必填" id="username">
+                         <input class="btn btn-primary" id="Sexecute" type="button" value="运行" /></p>
+
+
+
+
+                         <legend>配置文件对比</legend>
+                         <p>文件A路径:
+                         <input type="text" placeholder="需要对比的文件A，必填" id="fileA">
+                         </p>
+                         <p>文件B路径:
+                          <input type="text" placeholder="需要对比的文件B，必填" id="fileB">
+                         <input class="btn btn-primary" id="Fexecute" type="button" value="运行" /></p>
+
+
+
+
+
+
+                       <span class="help-block">执行结果</span><!--  <label class="checkbox"><input type="checkbox" /> 勾选同意</label> -->
+                       <!--<a class="label" id="showresult" href="#" target="_blank"></a>-->
+                       <textarea rows="20" cols="50" style="width: 800px; height: 150px;" id="showresult"></textarea>
+
+             </fieldset>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+<script>
+    $('#Wexecute').click(function(){
+        var userid=document.getElementById('Wuserid').value.replace(/\s*/ , "" );
+        if(userid==""){
+            alert('用户id不能为空');
+            return;
+        }
+        $.get('/clearwallet',{"userid":userid},function(ret){
+            document.getElementById('showresult').innerHTML=ret.status;
+            document.getElementById('showresult').style.visibility="visible";
+        })
+    });
+
+</script>
+
+
+<script>
+    $('#Rexecute').click(function(){
+        var userid=document.getElementById('Ruserid').value.replace(/\s*/ , "" );
+        if(userid==""){
+            alert('用户id不能为空');
+            return;
+        }
+        $.get('/clearrealname',{"userid":userid},function(ret){
+            document.getElementById('showresult').innerHTML=ret.status;
+            document.getElementById('showresult').style.visibility="visible";
+        })
+    });
+
+</script>
+
+<script>
+    $('#Sexecute').click(function(){
+        var userid=document.getElementById('Suserid').value.replace(/\s*/ , "" );
+        if(userid==""){
+            alert('用户id不能为空');
+            return;
+        }
+        var cardholder=document.getElementById('username').value.replace(/\s*/ , "" );
+        if(cardholder==""){
+            alert('持卡人不能为空');
+            return;
+        }
+        $.get('/clearsecstore',{"userid":userid,"cardholder":cardholder},function(ret){
+            document.getElementById('showresult').innerHTML=ret.status;
+            document.getElementById('showresult').style.visibility="visible";
+        })
+    });
+
+</script>
+
+
+
+<script>
+    $('#Fexecute').click(function(){
+        var fileA=document.getElementById('fileA').value.replace(/\s*/ , "" );
+        if(fileA==""){
+            alert('对比文件不能为空');
+            return;
+        }
+        var fileB=document.getElementById('fileB').value.replace(/\s*/ , "" );
+        if(fileB==""){
+            alert('对比文件不能为空');
+            return;
+        }
+        $.get('/diffile',{"fileA":fileA,"fileB":fileB},function(ret){
+            document.getElementById('showresult').innerHTML=ret.status;
+            document.getElementById('showresult').style.visibility="visible";
+        })
+    });
+
+</script>
+
+
+
+</body>
+</html>

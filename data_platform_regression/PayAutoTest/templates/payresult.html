@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="/static/dist/js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="/static/jquery-ui/jquery-ui"></script>
+<link href="/static/dist/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+<script type="text/javascript" src="/static/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="span12">
+			<div class="tabbable" id="tabs-40028">
+				<div class="tab-content">
+					<div class="tab-pane active" id="panel-670031">
+						<p>
+
+                        <form action="/payresult/" method="get">
+                            <table align="left">
+                                <tr>
+                                    <td><p>工单号:<input type="text" name="q"/></p></td>
+                                    <td><p>执行人:<input type="text" name="r"/></p></td>
+                                    <td><p><button type="submit" class="btn btn-primary">Search</button></p></td>
+                                </tr>
+                            </table>
+                        </form>
+
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>
+											编号
+										</th>
+										<th>
+											工单号
+										</th>
+										<th>
+											执行结果
+										</th>
+
+                                        <th>
+                                            执行环境
+                                        </th>
+
+                                        <th>
+                                            执行人
+				        </th>
+
+				    <th>
+					    执行时间
+				    </th>
+				    <th>
+					    结束时间
+				    </th>
+
+									</tr>
+								</thead>
+								<tbody>
+									{% for m in data %}
+									   <tr>
+                                           <td>{{m.id}}</td>
+									   <td>{{ m.jobid }}</td>
+									   <td><a href="/static/paytestresult/{{m.author}}_paytestresult/{{m.jobid}}/result.html">{{m.result}}</a></td>
+                                           <td>{{m.env}}</td>
+                                           <td>{{m.author}}</td>
+					   <td>{{m.ctime}}</td>
+					   <td>{{m.etime}}</td> 
+                                       </tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</p>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+
+    <div  class="pagination">
+    <span class="step-links">
+        {% if data.has_previous %}
+            <a href="?page={{ data.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ data.number }} of {{ data.paginator.num_pages }}.
+        </span>
+
+        {% if data.has_next %}
+            <a href="?page={{ data.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+    </div>
+
+
+</div>
+
+</body>
+</html>

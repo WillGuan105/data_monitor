@@ -1,0 +1,2 @@
+*/2 * * * * cd /home/data/xiaoyao/downPNG;DISPLAY=:0 /usr/bin/python downEmailPng.py >>/home/data/logs/downPNG.log  2>&1
+*/1 * * * * echo "hello!"

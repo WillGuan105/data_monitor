@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<div class="header">
+    <form action="/showresult/" method="get">
+        <table align="left">
+            <tr>
+                <td>PayAutoTest Running==============================</td>
+                <td> <button type="submit" class="btn btn-primary">刷新</button></td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<br/><br/>
+
+<div class="content">
+    {% for m in data %}
+    <br>{{m}}</br>
+    {% endfor %}
+</div>
+
+</body>
+</html>

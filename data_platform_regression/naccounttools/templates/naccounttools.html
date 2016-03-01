@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/static/dist/js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="/static/jquery-ui/jquery-ui.js"></script>
+    <link href="/static/dist/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+    <script type="text/javascript" src="/static/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span12">
+            <fieldset>
+                        <legend>查询用户\商户账户所在的表</legend>
+                        <li><p>选择类型</li>
+                        <label class="radio-inline">
+                            <input type="radio" checked="" name="usertype" value="customer"/>用户
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" checked="" name="usertype" value="merchant"/>商户
+                        </label>
+                        <li><p>用户\商户名称</li>
+                        <input type="text" id="name" name="username"> <br>
+                        <input class="btn btn-primary" id="Fexecute" type="button" value="查询" /></p>
+
+                        <span class="help-block"><li><p>执行结果:</li></span>
+                        <textarea rows="2" cols="10" style="width: 800px; height: 50px;" id="showresult"></textarea>
+
+
+
+                        <legend>验证记账是否成功(根据支付类型填写必要参数)</legend>
+                        <p>支付订单号payid：<input type="text" id="payid" name="payid"> </p>
+
+                <p>是否使用平台优惠劵:
+                        <input type="radio" checked=""  name="hasCoupon" value="yes"/>是
+                        <input type="radio" checked=""  name="hasCoupon" value="no"/>否
+                </p>
+                <p id="1">平台优惠劵抵用金额:<input type="text" id="couponAmount" name="couponAmount"> </p>
+
+                <p>支付类型:
+                    <input type="radio" checked="" name="paytype" value="0"/>0元购
+                    <input type="radio" checked="" name="paytype" value="1"/>余额支付
+                    <input type="radio" checked="" name="paytype"  value="2"/>网关/快捷支付
+                    <input type="radio" checked="" name="paytype" value="3"/>混合支付
+                    <input type="radio" checked="" name="paytype" value="4"/>白条支付
+                    <input type="radio" checked="" name="paytype" value="5"/>活动+快捷支付
+                    </p>
+                <p>余额支付金额:<input type="text" id="walletAmount" name="walletAmount"> </p>
+                <p>网关/快捷支付金额:<input type="text" id="payAmount" name="payAmount"> </p>
+                <p>白条支付金额:<input type="text" id="iouAmount" name="iouAmount"> </p>
+                <p>活动类型:
+                    <input type="radio" checked="" name="activityType" value="1"/>立减
+                    <input type="radio" name="activityType" value="2"/>立返
+                </p>
+                <p>活动支付金额:<input type="text" id="activityAmount" name="activityAmount"> </p>
+
+
+                <p>后续操作类型:
+                    <input type="radio" checked="" name="handleType" value="1"/>担保撤销
+                    <input type="radio" checked="" name="handleType" value="2"/>担保确认
+                    <input type="radio" checked="" name="handleType" value="3"/>退款
+                </p>
+                <p>操作金额:<input type="text" id="handleAmount" name="handleAmount"> </p>
+                <p>退款类型:
+                    <input type="radio" checked="" name="refundType" value="1"/>原路返回
+                    <input type="radio" name="refundType" value="2"/>退到钱包
+                </p>
+
+
+                <input class="btn btn-primary" id="Jexecute" type="button" value="查询" /></p>
+
+
+                        <span class="help-block"><li><p>记账结果查询:</li></span>
+                        <textarea rows="20" cols="50" style="width: 800px; height: 150px;" id="jizhangresult"></textarea>
+
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $('#Fexecute').click(function(){
+        var name=document.getElementById('name').value.replace(/\s*/ , "" );
+        if(name==""){
+            alert('名称不能为空');
+            return;
+        }
+
+        var paytype=document.getElementsByName("paytype");
+        var typevalue='';
+        for(i=0;i<paytype.length;i++){
+            if(paytype[i].checked){
+                typevalue=paytype[i].value;
+            }
+        }
+        if(typevalue==''){
+            alert('请选择类型');
+            return;
+        }
+
+        $.get('/fenbiao',{"usertype":typevalue,"username":name},function(ret){
+            document.getElementById('showresult').innerHTML=ret.status;
+            document.getElementById('showresult').style.visibility="visible";
+        })
+    });
+
+</script>
+
+
+
+
+
+<script>
+    $('#Jexecute').click(function(){
+
+        var payid=document.getElementById('payid').value.replace(/\s*/ , "" );
+        if(payid==""){
+            alert('payid不能为空');
+            return;
+        }
+
+        var hascoupon=document.getElementsByName("hasCoupon");
+        var iscoupon='';
+        for(i=0;i<hascoupon.length;i++) {
+            if (hascoupon[i].checked) {
+                iscoupon = hascoupon[i].value;
+            }
+        }
+
+        var couponvalue=document.getElementById('couponAmount').value.replace(/\s*/ , "" );
+
+
+        if(iscoupon=="yes") {
+            if (couponvalue == "") {
+                alert('确定使用了平台优惠劵?优惠劵抵用金额不能为空哦');
+                return;
+            }
+        }
+
+        //各支付金额
+        var walletAmount=document.getElementById('walletAmount').value.replace(/\s*/ , "" );
+        var payAmount=document.getElementById('payAmount').value.replace(/\s*/ , "" );
+        var iouAmount=document.getElementById('iouAmount').value.replace(/\s*/ , "" );
+        var activityAmount=document.getElementById('activityAmount').value.replace(/\s*/ , "" );
+        var handleAmount=document.getElementById('handleAmount').value.replace(/\s*/ , "" );
+
+        var paytype=document.getElementsByName("paytype");
+        var typevalue='';
+        for(i=0;i<paytype.length;i++){
+            if(paytype[i].checked){
+                typevalue=paytype[i].value;
+            }
+        }
+
+        if(typevalue=="0") {
+            if (couponvalue == "") {
+                alert('确定是0元购?优惠劵抵用金额不能为空哦');
+                return;
+            }
+        }
+
+        if(typevalue=='1'){
+            if(walletAmount=='') {
+                alert("使用余额支付方式，余额支付金额不能为空")
+                return;
+            }
+        }
+
+        if(typevalue=='2'){
+            if(payAmount=='') {
+                alert("使用网关/快捷支付方式，支付金额不能为空")
+                return;
+            }
+        }
+
+        if(typevalue=='3'){
+            if(walletAmount=='') {
+                alert("使用混合支付方式，余额支付金额不能为空")
+                return;
+            }
+            if(payAmount=='') {
+                alert("使用混合支付方式，支付金额不能为空")
+                return;
+            }
+
+        }
+
+        if(typevalue=='4'){
+            if(iouAmount=='') {
+                alert("使用白条支付方式，白条支付金额不能为空")
+                return;
+            }
+
+        }
+
+        if(typevalue==5){
+            if(activityAmount=='') {
+                alert("使用活动+快捷支付方式，活动支付金额不能为空")
+                return;
+            }
+            if(payAmount=='') {
+                alert("使用活动+快捷支付方式，快捷支付金额不能为空")
+                return;
+            }
+        }
+
+        //活动类型
+        var activityType=document.getElementsByName("activityType");
+        var activityTypeValue='';
+        for(i=0;i<activityType.length;i++){
+            if(activityType[i].checked){
+                activityTypeValue=activityType[i].value;
+            }
+        }
+
+        //退款方式
+        var refundType=document.getElementsByName("refundType");
+        var refundTypeValue='';
+        for(i=0;i<refundType.length;i++){
+            if(refundType[i].checked){
+                refundTypeValue=refundType[i].value;
+            }
+        }
+
+
+        //后续操作类型
+        var handletype=document.getElementsByName("handleType");
+        var handlevalue='';
+        for(i=0;i<handletype.length;i++){
+            if(handletype[i].checked){
+                handlevalue=handletype[i].value;
+            }
+        }
+       // if(handleAmount==''){
+       //     alert("退款/担保确认/担保撤销金额不能为空")
+       //     return;
+       // }
+
+        $.get('/checkAccount',{"payId":payid,"payType":typevalue,"walletAmount":walletAmount,"payAmount":payAmount,"couponAmount":couponvalue,"iouAmount":iouAmount,"activityType":activityTypeValue,"activityAmount":activityAmount,"handleType":handlevalue,"handleAmount":handleAmount,"refundType":refundTypeValue},function(ret){
+            document.getElementById('jizhangresult').innerHTML=ret.result;
+            document.getElementById('jizhangresult').style.visibility="visible";
+        })
+    });
+
+</script>
+
+</body>
+</html>

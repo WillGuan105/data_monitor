@@ -1,0 +1,1 @@
+{"status": 0, "msg": "success", "relyMsg": {}, "total": 1, "data": [{"date": "2015-07-08", "general_posterposter_paid_buyer": "15042", "general_poster_pv_uv_uv": "514177", "general_poster2st_uv_pv_poster2st_uv": "361121"}], "showMsg": ""}

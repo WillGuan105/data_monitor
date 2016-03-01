@@ -1,0 +1,51 @@
+#!/usr/bin/python
+
+import Image 
+from difflib import *
+from PIL.ImageChops import *
+
+def make_regalur_image(img, size = (256, 256)): 
+    return img.resize(size).convert('RGB') 
+
+def hist_similar(lh, rh): 
+    assert len(lh) == len(rh) 
+    return sum(1 - (0 if l == r else float(abs(l - r))/max(l, r)) for l, r in zip(lh, rh))/len(lh) 
+
+img1=Image.open("/Users/MLS/Documents/picCompare/contrast1.png") 
+img2=Image.open("/Users/MLS/Documents/picCompare/contrast4.png") 
+
+#img1=make_regalur_image(img1) 
+#img2=make_regalur_image(img2) 
+
+def finddiff(image1,image2):
+	image_diff_rgba = difference(image1, image2)
+	image_diff = Image.new("L", image_diff_rgba.size, 0)
+	for x in range(0,image_diff_rgba.size[0]):
+	    for y in range(0,image_diff_rgba.size[1]):
+	        r,g,b,a = image_diff_rgba.getpixel((x, y))
+	        if r or g or b:
+	        	image_diff.putpixel((x, y), 255)
+	image_diff.save("/Users/MLS/Documents/picCompare/diffimg.png")
+
+finddiff(img1,img2)
+
+
+point_table = ([0] + ([255] * 255))
+
+def black_or_b(a, b):
+    diff = difference(a, b)
+    diff = diff.convert('L')
+    diff = diff.point(point_table)
+    new = diff.convert('RGB')
+    new.paste(b, mask=diff)
+    return new
+
+diffimg = black_or_b(img1, img2)
+diffimg.save('/Users/MLS/Documents/picCompare/diffimg.png')
+	
+
+img1=make_regalur_image(img1)
+img2=make_regalur_image(img2)
+
+ret=hist_similar(img1.histogram(), img2.histogram()) 
+print "similar=",ret 

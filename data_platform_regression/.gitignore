@@ -1,0 +1,17 @@
+satic/datadiff/*
+static/diffPNG/*
+static/fakecubediff/*
+mysite/result
+nohup.out
+*.pyc
+db.sqlite3
+static/surefire-reports
+*.log
+static/yicheng_paytestresult
+static/weiguan_paytestresult
+static/paytestresult/*
+mysite/templates/queryReport.html
+.idea/*
+*.py~
+*.swp
+mysite/settings.py

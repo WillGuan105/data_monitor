@@ -1,0 +1,126 @@
+# -*-coding:utf-8 -*-
+
+import os,sys
+import json
+import logging
+import time
+import ConfigParser
+import traceback
+import thread
+import datetime
+from .models import *
+from django.core.exceptions import ObjectDoesNotExist
+
+
+
+class alertMailAndMsg:
+	def __init__(self):
+		self.msgInterval = datetime.timedelta(hours=3600)
+		self.BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+		self.logger=self.getLogger()
+
+	def checkTime(self):
+		nowhour = datetime.datetime.now().hour
+		isNight = False
+		if nowhour >= 1 and nowhour <= 7:
+			isNight = True
+		return isNight
+		
+	def updateMailTimes(self,id):
+		try:
+			arObj=alertRecord.objects.get(a_ID=id)
+			arObj.a_mailTimes = arObj.a_mailTimes +1
+			arObj.save()
+		except ObjectDoesNotExist:
+			self.logger.exception("updateRecord get object does not exist")
+			pass
+
+	def updateMsgTimes(self,id):
+		try:
+			arObj=alertRecord.objects.get(a_ID=id)
+			#arObj=self.getRecordObject(id)
+			arObj.a_msgTimes = arObj.a_msgTimes +1
+			arObj.save()
+		except ObjectDoesNotExist:
+			self.logger.exception("uodateRecord get object does not exist")
+			pass
+
+	def addRecord(self,id, interfaceName, createTime, mailTimes=0, msgTimes=0, lastMsgTime=''):
+		ar=alertRecord(id,interfaceName,createTime,mailTimes,msgTimes,lastMsgTime)
+		ar.save()
+
+	def isRecordExist(self,id):
+		try:
+			r = alertRecord.objects.get(a_ID=id)
+			return True
+		except ObjectDoesNotExist:
+			self.logger.exception("isRecordExist get object does not exist")
+			return False
+
+	def deleteRecord(self,id):
+		try:
+			r = alertRecord.objects.get(a_ID=id)
+			r.delete()
+		except ObjectDoesNotExist:
+			self.logger.exception("deleteRecord get object does not exist")
+			pass
+
+	def ifSendMsg(self,id):
+		if self.checkTime():
+			return False
+
+		arObj=self.getRecordObject(id)
+		if not arObj:
+			return False
+
+		if arObj.a_mailTimes < 2:
+			return False
+
+		meetInterval = self.ifMeetMsgInterval(arObj)
+
+		if not meetInterval or arObj.a_msgTimes > 2:
+			return False
+
+		return True
+
+	def ifMeetMsgInterval(self,arObj):
+		now=datetime.now()
+		if now-arObj.a_lastMsgTimes > self.msgInterval:
+			return True
+		return False
+
+
+	def getRecordObject(self,id):
+		try:
+			ar = alertRecord.objects.get(a_ID=id)
+			return ar
+		except ObjectDoesNotExist:
+			self.logger.exception("getRecordObject get object does not exist")
+			return None
+
+	def sendAlert(self,user,phoneMsg,mailSubj,mailcontent,alerttype):
+		#cmd = """/usr/bin/wget -q "http://smsapi.meilishuo.com/smssys/interface/smsapi.php?smsKey=1407399202710&type=%s&name=%s&phone=&smscontent=%s&mailsubject=%s&mailcontent=%s" -O /dev/null """ % (type,user,phoneMsg,mailSubj,mailcontent)
+		cmd = """wget -q 'http://smsapi.meilishuo.com/smssys/interface/smsapi.php?smsKey=1407399202710&type=%s&name=%s&phone=&smscontent=%s&mailsubject=%s&mailcontent=%s' -O /dev/null """ % (alerttype,user,phoneMsg,mailSubj,mailcontent)
+		print cmd
+		re=os.system(cmd)
+		print "############### sendAlert suc",re
+		if re:
+			self.logger.info("Msg send fail !!!")
+		else:
+			self.logger.warning("Msg send success !!!")
+ 
+	def getLogger(self):
+		#if self.getlogger:
+			#return self.getlogger
+		logger = logging.getLogger()
+		FILE=os.path.join(self.BASE_DIR,'log')
+		fh = logging.FileHandler(os.path.join(FILE,'Monitor.log'))
+		formatter = logging.Formatter('%(asctime)s -  %(filename)s[line:%(lineno)d]－%(name)s - %(levelname)s %(levelno)s : %(message)s')
+		fh.setFormatter(formatter)
+		logger.setLevel(logging.NOTSET)
+		logger.addHandler(fh)
+		return logger
+
+
+
+

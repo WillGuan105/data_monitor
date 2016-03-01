@@ -1,0 +1,61 @@
+#-*- coding: utf-8 -*-
+ 
+#!/usr/bin/python 
+ 
+import paramiko
+import threading
+import os
+import time
+
+username = "data"  #用户名
+passwd = "data"    #密码
+ip='172.17.28.41'
+port=22
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ 
+def ssh2(ip,username,passwd,cmd):
+    try:
+	print "before con"
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip,port,username,passwd,timeout=10000)
+	print "after con"
+        out=""
+        for m in cmd:
+            stdin, stdout, stderr = ssh.exec_command(m)
+#           stdin.write("Y")   #简单交互，输入 ‘Y’ 
+            out = stdout.readlines()
+            #屏幕输出
+            for o in out:
+                print o
+        print '%s\tOK\n'%(ip)
+        ssh.close()
+        return out
+    except :
+        print '%s\tError\n'%(ip)
+  
+def getPicComResult():
+    cmd = ['cd /home/data/xiaoyao/testPNG/test/src;python /home/data/xiaoyao/testPNG/test/src/picRegression.py']#你要执行的命令列表
+    print "Begin......"
+    re=ssh2(ip,username,passwd,cmd)
+    print "End......"
+    return re
+
+def scpPics(cur_show_id):
+    remote_path='/home/data/xiaoyao/testPNG/test/diffPNG'
+    local_path='%s/static/diffPNG' % (BASE_DIR)
+    t=paramiko.Transport((ip,port))
+    t.connect(username=username,password=passwd)
+    sftp=paramiko.SFTPClient.from_transport(t)
+    files_list=sftp.listdir(remote_path)
+    print "begin download diff pics ......"
+    for f in files_list:
+        remote_file=os.path.join(remote_path,f)
+        f=cur_show_id+"_"+f
+        local_file=os.path.join(local_path,f)
+        sftp.get(remote_file,local_file)
+    time.sleep(2)
+    print "scp pics completed ......"
+    t.close()
+

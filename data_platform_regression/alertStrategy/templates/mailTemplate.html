@@ -1,0 +1,98 @@
+<html>
+
+<body>
+<div>
+    <br>
+    <legend>监控报表</legend>
+    <p>
+        <table border="1" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>
+                        编号
+                    </th>
+                    <th>
+                        名称
+                    </th>
+                    <th>
+                        类目
+                    </th>
+                    <th>
+                        平台
+                    </th>
+                    <th>城市</th>
+                    <th>发生时间</th>
+                    <th>持续时间</th>
+                    <th>报警次数</th>
+                    <th>跟进人</th>
+                    <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ap in alertReports %}
+                    <tr>
+                    <td>{{ ap.id }}</td>
+                    <td>{{ ap.r_interfaceName }}</td>
+                    <td>{{ ap.r_class}}</td>
+                    <td>{{ ap.r_plat}}</td>
+                    <td>{{ ap.r_city}}</td>
+                    <td>{{ ap.r_createTime}}</td>
+                    <td>{{ ap.r_duration}}</td>
+                    <td>{{ ap.r_alertTimes}}</td>
+                    <td>{{ ap.r_traceUsers}}</td>
+                    <td>{{ ap.r_comments}}</td>
+                    </tr>
+                {% endfor %}
+                {% for ad in alert_records %}
+                    <tr>
+                    <td>{{ ad.id }}</td>
+                    <td>{{ ad.r_interfaceName }}</td>
+                    <td>{{ ad.r_class}}</td>
+                    <td>{{ ad.r_plat}}</td>
+                    <td>{{ ad.r_city}}</td>
+                    <td>{{ ad.r_createTime }}</td>
+                    <td>{{ ad.r_duration}}</td>
+                    <td>{{ ad.r_alertTimes}}</td>
+                    <td>{{ ad.r_traceUsers}}</td>
+                    <td>{{ ad.r_comments}}</td>
+                {% endfor %}
+            </tbody>
+        </table>
+    </p>
+    <legend>统计</legend>
+    <table border="1" cellspacing="0" style="width: 800px">
+        <thead>
+            <tr>
+                <th>类目</th>
+                <th>总报警次数</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in classDict %}
+                <tr class="info">
+                <td>{{ item.0 }}</td>
+                <td>{{ item.1 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table border="1" cellspacing="0" style="width: 800px">
+        <thead>
+            <tr>
+                <th>接口名字</th>
+                <th>总报警次数</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in interfDict %}
+                <tr class="warning">
+                <td>{{ item.0 }}</td>
+                <td>{{ item.1 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

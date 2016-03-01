@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>监控报表</title>
+    <link href="/static/datetimepicker/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/static/datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+    <script type="text/javascript" src="/static/datetimepicker/jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="/static/my-js/sortTable.js"></script>
+</head>
+
+<body onload="loadAction()">
+<div class="container-fluid">
+    <legend>监控报表</legend>
+    <div class="row">
+        <div class="col-md-4 form-horizontal">
+            <label class="label">开始时间</label>
+            <div class="input-append date form_date" data-date="" data-date-format="yyyy-mm-dd" data-link-field="begintime" data-link-format="yyyy-mm-dd">
+                <input size="16" type="text" id="showbegintime" value="" readonly>
+                <span class="add-on"><i class="icon-remove"></i></span>
+                <span class="add-on"><i class="icon-th"></i></span>
+            </div>
+            <input type="hidden" id="begintime" value="" /><br/>
+        </div>
+
+        <div class="col-md-4 form-horizontal">
+            <label class="label">结束时间</label>
+            <div class="input-append date form_date" data-date="" data-date-format="yyyy-mm-dd" data-link-field="endtime" data-link-format="yyyy-mm-dd">
+                <input size="16" type="text" id="showendtime" value="" readonly>
+                <span class="add-on"><i class="icon-remove"></i></span>
+                <span class="add-on"><i class="icon-th"></i></span>
+            </div>
+            <input type="hidden" id="endtime" value="" /><br/>
+        </div>
+
+        <div class="col-md-2">
+            <select class="btn-info" id="monitoClasses">
+            {% for m in mon_classes %}
+                <option>
+                    {{m.r_class}}
+                </option>
+            {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4 btn-group ">
+            <input class="btn btn-primary" id="query" type="button" value="查询" />
+        </div>
+
+        <div class="col-md-6 form-horizontal ">
+            <input type="text" placeholder="填邮箱前缀，多个用，分开" id="mailaddress">
+            <input class="btn btn-primary" id="sendmail" type="button" value="发送邮件" />
+        </div>
+
+    </div>
+    <br>
+    <legend>查询结果</legend>
+    <p>
+        <table class="table table-bordered" id="reportTable">
+            <thead>
+                <tr>
+                    <th onclick="$.sortTable.sort('reportTable',0)">编号</th>
+                    <th onclick="$.sortTable.sort('reportTable',1)">名称</th>
+                    <th onclick="$.sortTable.sort('reportTable',2)">类目</th>
+                    <th onclick="$.sortTable.sort('reportTable',3)">平台</th>
+                    <th onclick="$.sortTable.sort('reportTable',4)">城市</th>
+                    <th onclick="$.sortTable.sort('reportTable',5)">发生时间</th>
+                    <th onclick="$.sortTable.sort('reportTable',6)">持续时间</th>
+                    <th onclick="$.sortTable.sort('reportTable',7)">报警次数</th>
+                    <th onclick="$.sortTable.sort('reportTable',8)">跟进人</th>
+                    <th onclick="$.sortTable.sort('reportTable',9)">备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ad in alert_records %}
+                    <tr class="error">
+                    <td>{{ ad.id }}</td>
+                    <td style="color:darkblue";style=cursor:pointer; onclick=location.href="/getMonitorCurlCmd/?mid={{ ad.id }}" target="_blank">{{ ad.r_interfaceName }}/{{ ad.id }}</td>
+                    <td>{{ ad.r_class}}</td>
+                    <td>{{ ad.r_plat}}</td>
+                    <td>{{ ad.r_city}}</td>
+                    <td>{{ ad.r_createTime }}</td>
+                    <td>{{ ad.r_duration}}</td>
+                    <td>{{ ad.r_alertTimes}}</td>
+                    <td>{{ ad.r_traceUsers}}</td>
+                    <td>{{ ad.r_comments}}</td>
+                {% endfor %}
+                {% for ap in midaplist %}
+                   <tr class="success">
+                   <td>{{ ap.2 }}</td>
+                       {% if ap.0 %}
+                   <td style="color:darkblue";style=cursor:pointer; onclick=location.href="/getMonitorCurlCmd/?mid={{ ap.0 }}" target="_blank">{{ ap.1.0 }}</td>
+                       {% else %}
+                       <td>{{ ap.1.0 }}</td>
+                       {% endif %}
+                   <td>{{ ap.1.1}}</td>
+                   <td>{{ ap.1.2}}</td>
+                   <td>{{ ap.1.3}}</td>
+                   <td>{{ ap.1.4 }}</td>
+                   <td>{{ ap.1.5}}</td>
+                   <td>{{ ap.1.6}}</td>
+                   <td>{{ ap.1.7 }}</td>
+                   <td><input class="container-fluid" id="fix_{{ ap.2 }}" type="text" value="{{ ap.1.8 }}" onchange="updateComments(this.id)"/></td>
+                   </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </p>
+    <legend>统计</legend>
+    <table class="table table-condensed" id="classStatistic" style="width: 800px">
+        <thead>
+            <tr>
+                <th onclick="$.sortTable.sort('classStatistic',0)">类目</th>
+                <th onclick="$.sortTable.sort('classStatistic',1)">总报警次数</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in classDict %}
+                <tr class="info">
+                <td>{{ item.0 }}</td>
+                <td>{{ item.1 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table class="table table-condensed" id="interfaceStatistic" style="width: 800px">
+        <thead>
+            <tr>
+                <th onclick="$.sortTable.sort('interfaceStatistic',0)">接口名字</th>
+                <th onclick="$.sortTable.sort('interfaceStatistic',1)">总报警次数</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in interfDict %}
+                <tr class="warning">
+                <td>{{ item.0 }}</td>
+                <td>{{ item.1 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript" src="/static/datetimepicker/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/datetimepicker/js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+<script type="text/javascript" src="/static/datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<script type="text/javascript" src="/static/my-js/my-common.js"></script>
+<script type="text/javascript">
+	$('.form_date').datetimepicker({
+        language:  'zh-CN',
+        weekStart: 1,
+        todayBtn:  1,
+		autoclose: 1,
+		todayHighlight: 1,
+		startView: 2,
+		minView: 2,
+		forceParse: 0
+    });
+
+function loadAction()
+{
+	begintime=getCookie('begintime');
+	endtime=getCookie('endtime');
+	mailto=getCookie('mailto');
+	idx=getCookie('idx');
+
+	document.getElementById('begintime').value=begintime;
+    document.getElementById('showbegintime').value=begintime;
+	document.getElementById('endtime').value=endtime;
+    document.getElementById('showendtime').value=endtime;
+	window.document.getElementById('monitoClasses').selectedIndex=idx;
+    document.getElementById('mailaddress').value=mailto;
+}
+
+function updateComments(id)
+{
+    var comments=document.getElementById(id).value;
+    var rpid=id.split("_")[1]
+    $.get('/updateComments',{'rpid':rpid,'comments':comments},function(){
+
+    })
+
+}
+</script>
+
+<script>
+    $('#query').click(function(){
+        idx=window.document.getElementById('monitoClasses').selectedIndex;
+		belongClass=document.getElementById('monitoClasses').options[idx].text;
+        begin=document.getElementById('begintime').value;
+        if(begin==""){
+            alert("开始时间不能为空");
+            return;
+        }
+        end=document.getElementById('endtime').value;
+        if(end==""){
+            alert("结束时间不能为空");
+            return;
+        }
+        setCookie('begintime',begin,1);
+        setCookie('endtime',end,1);
+        setCookie('idx',idx,1);
+        window.location.href='/getAlertReport?belongClass='+belongClass+"&begin="+begin+"&end="+end;
+    });
+
+    $('#sendmail').click(function(){
+        idx=window.document.getElementById('monitoClasses').selectedIndex;
+		belongClass=document.getElementById('monitoClasses').options[idx].text;
+        begin=document.getElementById('begintime').value;
+        if(begin==""){
+            alert("开始时间不能为空");
+            return;
+        }
+        end=document.getElementById('endtime').value;
+        if(end==""){
+            alert("结束时间不能为空");
+            return;
+        }
+        var mailto=document.getElementById('mailaddress').value;
+        if(mailto==""){
+            alert("收件人不能为空");
+            return
+        }
+        setCookie('begintime',begin,1);
+        setCookie('endtime',end,1);
+        setCookie('idx',idx,1);
+        setCookie('mailto',mailto,1);
+        $.get('/sendMailService',{'to':mailto,"belongClass":belongClass,"begin":begin,"end":end},function(ret){
+            alert(ret);
+        })
+    });
+</script>
+
+</body>
+</html>
